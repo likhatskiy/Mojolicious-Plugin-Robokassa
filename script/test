@@ -1,0 +1,84 @@
+#!/usr/bin/env perl
+
+use lib qw(lib);
+use utf8;
+use Mojolicious::Lite;
+
+get '/' => 'index';
+post '/pay' => sub {
+	my $self = shift;
+	
+	return $self->redirect_to('/') unless $self->helper('robopay',
+		'OutSum' => $self->param('sum'),
+		'Email'  => 'likhatskiy@gmail.com',
+		'Desc'   => 'Тестовая Покупка',
+		
+		'Shp_user_id' => 12345,
+	);
+	
+	return;
+};
+post '/pay/result' => sub {
+	my $self = shift;
+	
+	return $self->helper('roboresult', sub {
+		my $c = shift;
+		return unless $c->param('Shp_user_id') && $c->param('Shp_user_id') == 12345;
+		
+		1;
+	});
+};
+
+post '/pay/success_fail/' => sub {
+	my $self = shift;
+	
+	return $self->render_text($self->param('type')) if $self->helper('roboverify');
+	
+	$self->render_text('BAD sign');
+};
+
+$ENV{'ROBOKASSA_DEBUG'} = 1;
+
+plugin 'robokassa' => {
+	mrh_login => 'demo',
+	mrh_pass1 => 'Morbid11',
+	mrh_pass2 => 'Morbid11',
+};
+
+app->start;
+
+
+__DATA__
+
+@@ index.html.ep
+% layout 'funky';
+
+<form method="post" action="/pay/">
+	Сумма: <input name="sum"/><br/>
+	Выберите способ оплаты:<br/>
+	<select name="IncCurrLabel">
+		<option value="">Другие способы оплаты</option>
+		<optgroup label="Электронные валюты">
+			<option value="PCR">Яндекс.Деньги</option>
+			<option value="WMRM">Webmoney WMR</option>
+			<option value="W1R">RUR Единый Кошелек</option>
+			<option value="MailRuR">Деньги@Mail.Ru</option>
+			<option value="VTB24R">RUR ВТБ24</option>
+		</optgroup>
+		<optgroup label="Банковские карты">
+			<option value="OceanBankR">Банковской картой через Platezh.ru</option>
+			<option value="BANKOCEANR">Банковской картой</option>
+		</optgroup>
+		<optgroup label="Другие способы оплаты">
+			<option value="IFreeR">С помощью SMS</option>
+		</optgroup>
+	</select>
+	<input type="submit" name="send" value="Оплатить"/>
+</form>
+
+
+@@ layouts/funky.html.ep
+<!doctype html><html>
+    <head><title>Robokassa</title></head>
+    <body><%== content %></body>
+</html>
