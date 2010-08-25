@@ -4,6 +4,9 @@ use strict;
 use warnings;
 
 use base 'Mojolicious::Plugin';
+
+our $VERSION = '0.1';
+
 use Mojo::ByteStream 'b';
 use Data::Dumper;
 
