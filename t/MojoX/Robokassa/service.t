@@ -14,9 +14,6 @@ use_ok("MojoX::Robokassa::Service");
 my $s = MojoX::Robokassa::Service->new;
 
 $s->conf({
-	#~ mrh_login       => 'mirpisem',
-	#~ mrh_pass1       => 'o4cg4pm12u',
-	#~ mrh_pass2       => '9apwwk74h8',
 	mrh_login       => 'demo',
 	mrh_pass1       => 'Morbid11',
 	mrh_pass2       => 'Morbid11',
