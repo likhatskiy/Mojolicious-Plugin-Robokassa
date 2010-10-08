@@ -5,7 +5,7 @@ use warnings;
 
 use base 'Mojolicious::Plugin';
 
-our $VERSION = '0.1';
+our $VERSION = '0.2';
 
 use Mojo::ByteStream 'b';
 use Data::Dumper;
@@ -67,7 +67,7 @@ sub pay {
 			
 			'SignatureValue=' . uc b(join ':',
 				$conf->{'mrh_login'}, $sum, $p{'InvId'}, $conf->{'mrh_pass1'},
-				map { "$_\=$p{$_}" } grep {/^Shp_/} keys %p,
+				map { "$_\=$p{$_}" } sort grep {/^Shp_/} keys %p,
 			)->md5_sum,
 		)
 	);
@@ -100,7 +100,7 @@ sub _verify_signature {
 	
 	uc b(join ':',
 		$c->param('OutSum'), $c->param('InvId'), $self->conf->{'mrh_pass' . $pass_type},
-		map { $_."=".$c->param($_) } grep {/^Shp_/} keys %{ $c->req->params->to_hash || {} },
+		map { $_."=".$c->param($_) } sort grep {/^Shp_/} keys %{ $c->req->params->to_hash || {} },
 	)->md5_sum eq uc $c->param('SignatureValue');
 }
 
